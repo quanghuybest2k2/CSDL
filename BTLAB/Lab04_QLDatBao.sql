@@ -179,5 +179,11 @@ GROUP BY dbo.DATBAO.MaKH
 SELECT ph.MaBaoTC, b.Ten, b.DinhKy
 FROM dbo.PHATHANH ph, dbo.BAO_TCHI b
 WHERE b.MaBaoTC = ph.MaBaoTC
-
--- Câu 15) Cho biết các tờ báo, tạp chi có từ 3 khách hàng đặt mua trở lên.
+GROUP BY ph.MaBaoTC, b.Ten, b.DinhKy
+HAVING COUNT(ph.MaBaoTC) = 2
+-- Câu 15) Cho biết các tờ báo, tạp chi có từ 3 khách hàng đặt mua trở lên.
+SELECT b.MaBaoTC AS MaBaoTapChi, b.Ten, b.DinhKy, COUNT(DISTINCT db.MaKH) AS SoLuongMua
+FROM dbo.DATBAO db
+JOIN dbo.BAO_TCHI b ON b.MaBaoTC = db.MaBaoTC
+GROUP BY b.MaBaoTC, b.Ten, b.DinhKy
+HAVING COUNT(DISTINCT db.MaKH) >= 3

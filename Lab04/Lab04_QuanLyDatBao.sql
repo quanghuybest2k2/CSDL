@@ -171,10 +171,11 @@ GROUP BY khachHang_id
 );
 
 -- 14) Cho biết các tờ báo phát hành định kỳ một tháng 2 lần.
-SELECT *
-FROM Bao
-WHERE dinhKy = N'Bán nguyệt san';
-
+SELECT ph.MaBaoTC, b.Ten, b.DinhKy
+FROM dbo.PHATHANH ph, dbo.BAO_TCHI b
+WHERE b.MaBaoTC = ph.MaBaoTC
+GROUP BY ph.MaBaoTC, b.Ten, b.DinhKy
+HAVING COUNT(ph.MaBaoTC) = 2
 -- 15) Cho biết các tờ báo, tạp chi có từ 3 khách hàng đặt mua trở lên.
 SELECT Bao.id AS MaBao, Bao.ten, Bao.dinhKy, COUNT(DISTINCT khachHang_id) AS SoLuongKhachMua
 FROM DatBao
