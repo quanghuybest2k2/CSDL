@@ -187,3 +187,23 @@ FROM dbo.DATBAO db
 JOIN dbo.BAO_TCHI b ON b.MaBaoTC = db.MaBaoTC
 GROUP BY b.MaBaoTC, b.Ten, b.DinhKy
 HAVING COUNT(DISTINCT db.MaKH) >= 3
+--- Hàm và thủ tục
+--Viết các hàm sau
+-- a) Tính tổng số tiền mua báo/tạp chí của một khách hàng cho trước.
+SELECT kh.MaKH, kh.TenKH, SUM(db.SLMua) AS TongSoLuongMua
+FROM dbo.KHACHHANG kh, dbo.DATBAO db
+WHERE db.MaKH = kh.MaKH
+GROUP BY kh.MaKH, kh.TenKH
+BEGIN
+DECLARE @TongSoTien INT
+SET @TongSoTien = (SELECT *
+FROM dbo.DATBAO
+)
+END;
+
+-- b) Tính tổng số tiền thu được của một tờ báo/tạp chí cho trước
+
+-- Viết các thủ tục sau
+-- a) In danh mục báo, tạp chí phải giao cho một khách hàng cho trước.
+
+-- b) In danh sách khách hàng đặt mua báo/tạp chí cho trước.
