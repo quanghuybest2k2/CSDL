@@ -176,11 +176,14 @@ FROM DatBao
 GROUP BY dbo.DATBAO.MaKH
 );
 -- Câu 14) Cho biết các tờ báo phát hành định kỳ một tháng 2 lần.
-SELECT ph.MaBaoTC, b.Ten, b.DinhKy
-FROM dbo.PHATHANH ph, dbo.BAO_TCHI b
-WHERE b.MaBaoTC = ph.MaBaoTC
-GROUP BY ph.MaBaoTC, b.Ten, b.DinhKy
-HAVING COUNT(ph.MaBaoTC) = 2
+SELECT *
+FROM dbo.BAO_TCHI
+WHERE DinhKy = N'Bán Nguyệt San'
+--SELECT ph.MaBaoTC, b.Ten, b.DinhKy
+--FROM dbo.PHATHANH ph, dbo.BAO_TCHI b
+--WHERE b.MaBaoTC = ph.MaBaoTC
+--GROUP BY ph.MaBaoTC, b.Ten, b.DinhKy
+--HAVING COUNT(ph.MaBaoTC) = 2
 -- Câu 15) Cho biết các tờ báo, tạp chi có từ 3 khách hàng đặt mua trở lên.
 SELECT b.MaBaoTC AS MaBaoTapChi, b.Ten, b.DinhKy, COUNT(DISTINCT db.MaKH) AS SoLuongMua
 FROM dbo.DATBAO db
