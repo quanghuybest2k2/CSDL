@@ -190,16 +190,29 @@ HAVING COUNT(DISTINCT db.MaKH) >= 3
 --- Hàm và thủ tục
 --Viết các hàm sau
 -- a) Tính tổng số tiền mua báo/tạp chí của một khách hàng cho trước.
-SELECT kh.MaKH, kh.TenKH, SUM(db.SLMua) AS TongSoLuongMua
-FROM dbo.KHACHHANG kh, dbo.DATBAO db
-WHERE db.MaKH = kh.MaKH
+SELECT kh.MaKH, kh.TenKH, SUM(db.SLMua * b.GiaBan) AS TongSoLuongMua
+FROM dbo.KHACHHANG kh, dbo.DATBAO db, dbo.BAO_TCHI b
+WHERE db.MaKH = kh.MaKH AND b.MaBaoTC = db.MaBaoTC
 GROUP BY kh.MaKH, kh.TenKH
-BEGIN
-DECLARE @TongSoTien INT
-SET @TongSoTien = (SELECT *
-FROM dbo.DATBAO
-)
-END;
+----
+
+CREATE function TongTienMua(@makh char(4)) returns int
+As
+Begin
+	declare @TongTien int
+	if exists (select * FROM dbo.KHACHHANG where MaKH = @makh) ---Nếu tồn tại lớp @malop trong CSDL
+		Begin
+		--Tính tổng số học phí thu được trên 1 lớp
+		select @TongTien = SUM(db.SLMua * b.GiaBan)
+		from	dbo.KHACHHANG kh, dbo.DATBAO db, dbo.BAO_TCHI b
+		where	db.MaKH = kh.MaKH AND b.MaBaoTC = db.MaBaoTC AND db.MaKH=@maKH
+		GROUP BY kh.MaKH
+		
+		END	
+		RETURN @TongTien
+END
+PRINT N'Kết quả: ' + CONVERT(CHAR(10),dbo.TongTienMua('KH02'))
+
 
 -- b) Tính tổng số tiền thu được của một tờ báo/tạp chí cho trước
 
