@@ -1,10 +1,4 @@
-﻿------------------------------------------------
-/* Học phần: Cơ sở dữ liệu
-   Ngày: 10/05/2020
-   Người thực hiện: Nguyễn Trọng Hiếu
-   MSSV: 1812756
-   Lớp: CTK42
-*/
+﻿
 ------------------------------------------------
 
 CREATE DATABASE Lab06_QuanLyHocVien;
