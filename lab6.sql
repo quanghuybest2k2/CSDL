@@ -58,6 +58,69 @@ select * from Lop
 select * from HocVien
 select * from HocPhi
 
+--------------------------------cau 4 --------------------------------------
+--Cài đặt ràng buộc toàn vẹn
+--a.giờ kết thúc của một ca học không được trước giờ bắt đầu ca học đó (giờ bắt đầu - giờ kết thúc <0)
+CREATE TRIGGER UTG_CaHoc
+ON dbo.CaHoc
+FOR INSERT
+AS
+BEGIN
+    DECLARE @Count INT = 0;
+	SELECT @Count= COUNT(*) FROM Inserted
+	WHERE DATEPART(HOUR,Inserted.GioBatDau)-DATEPART(HOUR,Inserted.GioKetThuc)>0
+
+	IF(@Count >0)
+	BEGIN
+	    PRINT N'giờ kết thúc của một ca hoc không được trước giờ bắt đầu của ca học đó'
+		ROLLBACK TRAN
+	END
+END
+SELECT CONVERT(VARCHAR(8), GioBatDau, 108) 'hh:mi:ss' from CaHoc
+SELECT CONVERT(VARCHAR(8), GioKetThuc, 108) 'hh:mi:ss' from CaHoc
+
+--DROP TRIGGER UTG_CaHoc
+--b.Sĩ số của một lớp học không quá 30 học viên và đúng bằng số học viên của lớp đó
+CREATE TRIGGER UTG_siSo
+ON dbo.Lop
+FOR INSERT 
+AS
+IF UPDATE(MaLop) Or UPDATE(SoHV)
+BEGIN
+    DECLARE @Count INT=0;
+	SELECT @Count = COUNT(*) FROM Inserted
+	WHERE Inserted.SoHV>30 AND  Inserted.SoHV<>(SELECT COUNT(MSHV)
+												FROM dbo.HocVien
+												WHERE MaLop=Inserted.MaLop)
+
+	IF (@Count >0)
+	BEGIN
+		PRINT N'Sĩ số của một lớp học không quá 30 học viên và đúng bằng số học viên'
+	    ROLLBACK TRAN
+	END
+END
+
+--DROP TRIGGER UTG_siSo
+
+--c.Tổng số tiền thu của một học viên không vượt quá học phí của lớp mà học viên đó đăng ký học
+CREATE TRIGGER UTG_hocPhi
+ON dbo.HocPhi
+FOR INSERT 
+AS
+BEGIN
+    DECLARE @Count INT=0;
+	SELECT @Count= COUNT(*) FROM Inserted
+	WHERE Inserted.SoTien>(SELECT HocPhi
+							FROM dbo.Lop,dbo.HocVien
+							WHERE MSHV=Inserted.MSHV)
+
+	IF(@Count>0)
+	BEGIN
+		PRINT N'Tổng số tiền thu của một học viên không vượt quá học phí của lớp mà học viên đó đăng ký học'
+	    ROLLBACK TRAN
+	END
+END
+
 ----------XÂY DỰNG CÁC THỦ TỤC NHẬP DỮ LIỆU (Câu 5a) -------------
 CREATE PROC usp_ThemCaHoc
 	@ca tinyint, @giobd Datetime, @giokt Datetime
@@ -189,7 +252,7 @@ exec usp_ThemHocPhi '0007','W12301','18/02/2008',100000,'HP Word 2-4-6', N'Lan'
 
 
 ------------------XÂY DỰNG CÁC THỦ TỤC SỬA DỮ LIỆU----------
---b.Cập nhật thông tin của một học viên cho trước
+--5b.Cập nhật thông tin của một học viên cho trước
 
 CREATE PROC usp_UpdateHocVien @mshv CHAR(6),@ho nvarchar(20),@ten nvarchar(20),@ns datetime,@phai nvarchar(4),@malop CHAR(4)
 AS
@@ -219,7 +282,7 @@ exec usp_UpdateHocVien 'E11403',N'Trần Mai', N'Linh', '04/06/1990',N'Nữ', 'E
 exec usp_UpdateHocVien 'W12301',N'Nguyễn Ngọc', N'Tuyết', '12/05/1996',N'Nữ', 'W123'
 
 SELECT * FROM dbo.HocVien
---c.Xóa một học viên cho trước
+--5c.Xóa một học viên cho trước
 CREATE PROC usp_DeleteHocVien @mshv CHAR(6)
 AS
 	IF EXISTS(SELECT * FROM dbo.HocVien WHERE MSHV=@mshv)
@@ -235,7 +298,7 @@ AS
 EXEC usp_DeleteHocVien 'W12301'
 
 SELECT * FROM dbo.HocVien
---d.Cập nhật thông tin của một lớp học cho trước
+--5d.Cập nhật thông tin của một lớp học cho trước
 CREATE PROC usp_UpdateLop @malop CHAR(4),@tenlop varchar(30),@ngaykg datetime,@hocphi int,@ca tinyint,@sotiet int,@sohv int,@magv CHAR(4)
 AS
 	IF EXISTS (SELECT * FROM dbo.Lop WHERE MaLop=@malop)
@@ -258,7 +321,7 @@ AS
 -------------------------
 
 EXEC usp_UpdateLop 'W123',N'Word 4-6-8','02/18/2008', 100000,2,30,1,'G004'
---e.Xóa một lớp học cho trước nếu lớp này không có học viên
+--5e.Xóa một lớp học cho trước nếu lớp này không có học viên
 CREATE PROC usp_DeleteLop @malop CHAR(4)
 AS
 	IF EXISTS (SELECT * FROM dbo.Lop WHERE MaLop=@malop AND SoHV =0)
@@ -277,7 +340,7 @@ AS
 
 ----------------------------------------
 EXEC usp_DeleteLop 'W124'
---f.Lập danh sách học viên của một lớp cho trước
+--5f.Lập danh sách học viên của một lớp cho trước
 CREATE PROC usp_LapDSLop @malop CHAR(4)
 AS
 	IF EXISTS(SELECT * FROM dbo.Lop WHERE MaLop=@malop)
@@ -291,7 +354,7 @@ AS
 
 --------------------------
 EXEC usp_LapDSLop 'A075'
---g.Lập danh sách học viên chưa đóng đủ học phí của một lớp cho trước
+--5g.Lập danh sách học viên chưa đóng đủ học phí của một lớp cho trước
 CREATE PROC usp_DSHVChuaDuHP @malop CHAR(4)
 AS 
 	IF EXISTS (SELECT * FROM dbo.Lop WHERE MaLop=@malop)
@@ -307,10 +370,6 @@ AS
 		END
 
 EXEC usp_DSHVChuaDuHP 'A075'
-------------------XÂY DỰNG CÁC THỦ TỤC XÓA DỮ LIỆU----------
-
-
--------------------------------------------------------------------------------
 --------------------HÀM SINH MÃ & CÁCH SỬ DỤNG----------------
 /*1. Viết hàm sinh mã cho giáo viên mới theo quy tắc lấy mã lớn nhất hiện có 
 sau đó tăng thêm 1 đơn vị*/
@@ -430,8 +489,6 @@ cập nhật SoHV trong bảng Lop*/
 
 /*4c)Tổng số tiền thu của một học viên không vượt quá học phí của lớp mà học viên đó đăng ký học*/
 --Tự làm
-
-/*5b --> 5g: tự làm*/
 
 --6a) Hàm tính tổng số học phí đã thu được của một lớp khi biết mã lớp. 
 create function fn_TongHocPhi1Lop(@malop char(4)) returns int
