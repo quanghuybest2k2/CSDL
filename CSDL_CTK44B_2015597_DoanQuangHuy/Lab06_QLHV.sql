@@ -2,7 +2,6 @@
 Học phần cơ sở dữ liệu
 Người thực hiện: Đoàn Quang Huy
 MSSV: 2015597
-Ngày: 
 */
 CREATE DATABASE Lab06_QLHV
 GO
