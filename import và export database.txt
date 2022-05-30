@@ -1,0 +1,1 @@
+Chọn CSDL muốn export, click chuột phải => task => Generrate Script => Next => Script Entire db => Advance: schime and data => Save as script file: đường dẫn lưu file => Next => Finish 
